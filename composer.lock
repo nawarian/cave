@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "7a876b0995fe03d42f1966d0a6cd0e86",
+    "content-hash": "96abf59fc23ad4e19f47966e447ead74",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -1522,6 +1522,48 @@
                 }
             ],
             "time": "2022-07-28T22:46:52+00:00"
+        },
+        {
+            "name": "nawarian/cave-twitter-bundle",
+            "version": "0.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/nawarian/cave-twitter-bundle.git",
+                "reference": "3516330f034a687c63d06d5357b614136ebb816e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/nawarian/cave-twitter-bundle/zipball/3516330f034a687c63d06d5357b614136ebb816e",
+                "reference": "3516330f034a687c63d06d5357b614136ebb816e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.4.30",
+                "symfony/console": "^5.4",
+                "symfony/framework-bundle": "^5.4"
+            },
+            "type": "symfony-bundle",
+            "autoload": {
+                "psr-4": {
+                    "Nawarian\\CaveTwitterBundle\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "GPL-3.0-or-later"
+            ],
+            "authors": [
+                {
+                    "name": "Níckolas Da Silva",
+                    "email": "nickolas@phpsp.org.br"
+                }
+            ],
+            "description": "A twitter module for \"cave\"",
+            "support": {
+                "issues": "https://github.com/nawarian/cave-twitter-bundle/issues",
+                "source": "https://github.com/nawarian/cave-twitter-bundle/tree/0.0.0"
+            },
+            "time": "2022-08-30T12:02:47+00:00"
         },
         {
             "name": "psr/cache",
