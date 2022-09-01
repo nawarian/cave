@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Entity\ScheduledCommand;
 use App\Repository\ScheduledCommandRepository;
+use App\Service\ProfileService;
 use DateTimeImmutable;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -18,11 +19,15 @@ class ScheduleCommand extends Command
     protected static $defaultDescription = 'Schedules a command to be executed';
 
     private ScheduledCommandRepository $scheduledCommandRepository;
+    private ProfileService $profileService;
 
-    public function __construct(ScheduledCommandRepository $scheduledCommandRepository)
-    {
+    public function __construct(
+        ScheduledCommandRepository $scheduledCommandRepository,
+        ProfileService $profileService
+    ) {
         parent::__construct();
         $this->scheduledCommandRepository = $scheduledCommandRepository;
+        $this->profileService = $profileService;
     }
 
     protected function configure(): void
@@ -42,10 +47,13 @@ class ScheduleCommand extends Command
         $command = $input->getArgument('cmd');
         $date = $input->getArgument('date');
 
+        $profile = $this->profileService->getCurrentProfile();
+
         $scheduledCommand = new ScheduledCommand();
         $scheduledCommand->setCommandLine($command);
         $scheduledCommand->setDue(new DateTimeImmutable($date));
         $scheduledCommand->setAttempts(0);
+        $scheduledCommand->setProfile($profile);
 
         $this->scheduledCommandRepository->add($scheduledCommand, true);
 

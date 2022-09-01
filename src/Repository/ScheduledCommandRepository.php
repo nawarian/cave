@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Repository;
 
+use App\Entity\Profile;
 use App\Entity\ScheduledCommand;
 use DateTimeImmutable;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
@@ -43,7 +44,7 @@ class ScheduledCommandRepository extends ServiceEntityRepository
     }
 
     /** @return ScheduledCommand[] */
-    public function getPendingScheduledCommands(int $limit): array
+    public function getPendingScheduledCommands(Profile $profile, int $limit): array
     {
         $builder = $this->createQueryBuilder('c');
 
@@ -52,8 +53,10 @@ class ScheduledCommandRepository extends ServiceEntityRepository
             ->where(
                 $builder->expr()->lte('c.due', ':now')
             )
+            ->andWhere($builder->expr()->eq('c.profile', ':profile'))
             ->setMaxResults($limit)
             ->setParameter('now', new DateTimeImmutable('now'), 'datetime_immutable')
+            ->setParameter('profile', $profile)
             ->getQuery()
             ->getResult();
     }

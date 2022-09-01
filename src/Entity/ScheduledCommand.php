@@ -35,6 +35,12 @@ class ScheduledCommand
      */
     private int $attempts;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Profile::class)
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private Profile $profile;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -72,6 +78,18 @@ class ScheduledCommand
     public function setAttempts(int $attempts): self
     {
         $this->attempts = $attempts;
+
+        return $this;
+    }
+
+    public function getProfile(): ?Profile
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?Profile $profile): self
+    {
+        $this->profile = $profile;
 
         return $this;
     }
