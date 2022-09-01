@@ -60,7 +60,13 @@ class Profile
 
     public function getValue(string $key): ?string
     {
-        return $this->getKv()->filter(fn (ProfileKV $kv) => $kv->getKey() === $key)->first() ?: null;
+        /** @var ProfileKV|false $profileKV */
+        $profileKV = $this->getKv()->filter(fn(ProfileKV $kv) => $kv->getKey() === $key)->first();
+        if (!$profileKV) {
+            return null;
+        }
+
+        return $profileKV->getValue();
     }
 
     /**

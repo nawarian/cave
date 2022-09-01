@@ -38,9 +38,6 @@
             "migrations/.gitignore"
         ]
     },
-    "nawarian/cave-twitter-bundle": {
-        "version": "0.0.0"
-    },
     "symfony/console": {
         "version": "5.4",
         "recipe": {

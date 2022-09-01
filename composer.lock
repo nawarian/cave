@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "74eaf99e74238fe0898c58424dd3a151",
+    "content-hash": "44c4ca6f6f089050dacaa7e08ff3ddfc",
     "packages": [
         {
             "name": "abraham/twitteroauth",
@@ -1660,49 +1660,6 @@
                 }
             ],
             "time": "2022-07-28T22:46:52+00:00"
-        },
-        {
-            "name": "nawarian/cave-twitter-bundle",
-            "version": "0.2.2",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/nawarian/cave-twitter-bundle.git",
-                "reference": "04932c429451a32d21c7b2fbd28d38b3e9796433"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/nawarian/cave-twitter-bundle/zipball/04932c429451a32d21c7b2fbd28d38b3e9796433",
-                "reference": "04932c429451a32d21c7b2fbd28d38b3e9796433",
-                "shasum": ""
-            },
-            "require": {
-                "abraham/twitteroauth": "^4.0",
-                "php": "^7.4.30",
-                "symfony/console": "^5.4",
-                "symfony/framework-bundle": "^5.4"
-            },
-            "type": "symfony-bundle",
-            "autoload": {
-                "psr-4": {
-                    "Nawarian\\CaveTwitterBundle\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "GPL-3.0-or-later"
-            ],
-            "authors": [
-                {
-                    "name": "Níckolas Da Silva",
-                    "email": "nickolas@phpsp.org.br"
-                }
-            ],
-            "description": "A twitter module for \"cave\"",
-            "support": {
-                "issues": "https://github.com/nawarian/cave-twitter-bundle/issues",
-                "source": "https://github.com/nawarian/cave-twitter-bundle/tree/0.2.2"
-            },
-            "time": "2022-08-31T17:14:13+00:00"
         },
         {
             "name": "psr/cache",
