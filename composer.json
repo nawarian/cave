@@ -1,6 +1,6 @@
 {
     "type": "project",
-    "license": "proprietary",
+    "license": "GPL-3-or-later",
     "minimum-stability": "stable",
     "prefer-stable": true,
     "require": {
@@ -67,7 +67,6 @@
             "allow-contrib": false,
             "require": "5.4.*",
             "endpoint": [
-                "https://api.github.com/repos/nawarian/cave-recipes/contents/index.json",
                 "flex://defaults"
             ]
         }
