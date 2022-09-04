@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\Tweet;
+use App\Entity\TweetMedia;
+use App\Repository\TweetRepository;
 use App\Service\TwitterService;
 use SplFileInfo;
 use Symfony\Component\Console\Command\Command;
@@ -18,11 +21,13 @@ class TwitterTweetCommand extends Command
     protected static $defaultName = 'twitter:tweet';
     protected static $defaultDescription = 'Publishes a new twitter status.';
 
+    private TweetRepository $tweetRepository;
     private TwitterService $twitterService;
 
-    public function __construct(TwitterService $twitterService)
+    public function __construct(TweetRepository $tweetRepository, TwitterService $twitterService)
     {
         parent::__construct();
+        $this->tweetRepository = $tweetRepository;
         $this->twitterService = $twitterService;
     }
 
@@ -56,6 +61,16 @@ class TwitterTweetCommand extends Command
 
         ['name' => $twitterUserName, 'handle' => $twitterHandle] = $this->twitterService->whoAmI();
 
+        $tweet = new Tweet();
+        $tweet->setText($text);
+
+        foreach ($medias as $media) {
+            $tweetMedia = new TweetMedia();
+            $tweetMedia->setFilepath($media);
+            $tweetMedia->setUploaded(false);
+            $tweet->addMedia($tweetMedia);
+        }
+
         !$io->isQuiet() && !$force && $io->horizontalTable(
             ['Text', 'Images', 'Account', 'Profile name'],
             [[$text, implode(', ', $medias), $twitterHandle, $twitterUserName]]
@@ -66,14 +81,24 @@ class TwitterTweetCommand extends Command
             return self::SUCCESS;
         }
 
-        $mediaIds = [];
-        foreach ($medias as $media) {
-            $mediaIds[] = $this->twitterService->uploadMedia(new SplFileInfo($media));
+        foreach ($tweet->getMedias() as $media) {
+            $mediaId = $this->twitterService->uploadMedia(new SplFileInfo($media->getFilepath()));
+            $media->setTwitterMediaId($mediaId);
+            $media->setUploaded(true);
         }
 
-        $tweetLink = $this->twitterService->tweet($text, $mediaIds);
+        $tweetId = $this->twitterService->tweet(
+            $text,
+            $tweet
+                ->getMedias()
+                ->map(fn (TweetMedia $m) => $m->getTwitterMediaId())
+                ->toArray()
+        );
+        $tweet->setTwitterTweetId($tweetId);
+        $tweet->setSent(true);
+        $this->tweetRepository->add($tweet, true);
 
-        !$io->isQuiet() && $io->writeln($tweetLink);
+        !$io->isQuiet() && $io->writeln("https://twitter.com/{$twitterHandle}/status/{$tweetId}");
 
         return self::SUCCESS;
     }

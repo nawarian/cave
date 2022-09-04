@@ -39,17 +39,19 @@ class TwitterService
         return (string) $res->media_id_string;
     }
 
-    public function tweet(string $text, array $mediaIds): string
+    public function tweet(string $text, array $mediaIds, ?string $replyTo = null, ?string $mentionUser = null): string
     {
+        if ($mentionUser !== null) {
+            $text = "@{$mentionUser} {$text}";
+        }
+
         $res = $this->client()->post('statuses/update', [
             'status' => $text,
             'media_ids' => $mediaIds,
+            'in_reply_to_status_id' => $replyTo,
         ]);
 
-        $statusId = $res->id_str;
-        $username = $res->user->screen_name;
-
-        return "https://twitter.com/{$username}/status/{$statusId}";
+        return $res->id_str;
     }
 
     private function client(): TwitterOAuth
