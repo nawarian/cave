@@ -54,9 +54,10 @@ class TwitterThreadCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $file = new SplFileInfo($input->getArgument('file'));
+        $basePath = $file->getPath();
         $content = $file->openFile()->fread($file->getSize());
 
-        $tweets = $this->parseContent($content);
+        $tweets = $this->parseContent($content, $basePath);
         $thread = $this->persistThread($tweets);
 
         $twitterHandle = $this->twitterService->whoAmI()['handle'];
@@ -102,7 +103,7 @@ class TwitterThreadCommand extends Command
     }
 
     /** @return Tweet[] */
-    private function parseContent(string $content): array
+    private function parseContent(string $content, string $basePath): array
     {
         $tweets = [];
 
@@ -137,8 +138,13 @@ class TwitterThreadCommand extends Command
                     if (!preg_match('#^\[(.*)\]\((.+)\)$#', $rawImg, $matches)) {
                         throw new RuntimeException("Detected image is malformed: '{$rawImg}'");
                     }
-
                     [, $alt, $path] = $matches;
+
+                    $path = file_exists($path) ? $path : "{$basePath}/{$path}";
+                    if (!file_exists($path)) {
+                        throw new RuntimeException("File {$path} not found.");
+                    }
+
                     $tweetMedia = new TweetMedia();
                     $tweetMedia->setTweet($currentTweet);
                     $tweetMedia->setAltText($alt);
