@@ -59,6 +59,18 @@ class ProfileKeyCommand extends Command
         $value = $input->getArgument('value') ?? null;
         $isDelete = $input->getOption('delete') ?? false;
 
+        if ($value === null) {
+            ['seekable' => $seekable] = stream_get_meta_data(STDIN);
+            $streamInput = '';
+            while ($seekable && !feof(STDIN)) {
+                $streamInput .= fread(STDIN, 1);
+            }
+
+            if (strlen($streamInput) > 0) {
+                $value = $streamInput;
+            }
+        }
+
         $profile = $this->profileService->getCurrentProfile();
 
         $kv = $profile->getKv()->filter(fn (ProfileKV $kv) => $kv->getKey() === $key)->first();
