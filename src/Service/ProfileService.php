@@ -27,4 +27,19 @@ class ProfileService
 
         return $profile;
     }
+
+    public function setCurrentProfile(Profile $profile): void
+    {
+        $current = $this->profileRepository->findBy([
+            'current' => true,
+        ]);
+
+        foreach ($current as $currentProfile) {
+            $currentProfile->setCurrent(false);
+            $this->profileRepository->add($currentProfile);
+        }
+
+        $profile->setCurrent(true);
+        $this->profileRepository->add($profile, true);
+    }
 }

@@ -11,6 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 class ScheduleRunCommand extends Command
 {
@@ -45,21 +46,32 @@ class ScheduleRunCommand extends Command
     {
         $remaining = (int) $input->getArgument('count');
 
-        $profile = $this->profileService->getCurrentProfile();
-        $pendingCommands = $this->scheduledCommandRepository->getPendingScheduledCommands($profile, $remaining);
+        $originalProfile = $this->profileService->getCurrentProfile();
+        $allPendingCommands = $this->scheduledCommandRepository->getAllPendingScheduledCommands($remaining);
 
-        foreach ($pendingCommands as $command) {
-            $process = Process::fromShellCommandline($command->getCommandLine());
-            $exitCode = $process->run();
+        try {
+            foreach ($allPendingCommands as $command) {
+                // Update current profile based on command
+                $this->profileService->setCurrentProfile($command->getProfile());
 
-            if ($exitCode !== self::SUCCESS) {
-                $command->setAttempts($command->getAttempts() + 1);
-                $this->scheduledCommandRepository->add($command, true);
-                continue;
+                $process = Process::fromShellCommandline($command->getCommandLine());
+                $exitCode = $process->run();
+
+                if ($exitCode !== self::SUCCESS) {
+                    $command->setAttempts($command->getAttempts() + 1);
+                    $this->scheduledCommandRepository->add($command, true);
+                    continue;
+                }
+
+                $this->scheduledCommandRepository->remove($command, true);
             }
-
-            $this->scheduledCommandRepository->remove($command, true);
+        } catch (Throwable $e) {
+            $this->profileService->setCurrentProfile($originalProfile);
+            return self::FAILURE;
         }
+
+        // Restore initial profile
+        $this->profileService->setCurrentProfile($originalProfile);
 
         return self::SUCCESS;
     }

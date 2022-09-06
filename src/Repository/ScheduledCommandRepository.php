@@ -60,4 +60,19 @@ class ScheduledCommandRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function getAllPendingScheduledCommands(int $limit): array
+    {
+        $builder = $this->createQueryBuilder('c');
+
+        return $builder
+            ->select('c')
+            ->where(
+                $builder->expr()->lte('c.due', ':now')
+            )
+            ->setMaxResults($limit)
+            ->setParameter('now', new DateTimeImmutable('now'), 'datetime_immutable')
+            ->getQuery()
+            ->getResult();
+    }
 }

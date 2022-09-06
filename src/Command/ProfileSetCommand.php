@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Entity\Profile;
 use App\Repository\ProfileRepository;
+use App\Service\ProfileService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,12 +19,16 @@ class ProfileSetCommand extends Command
     protected static $defaultDescription = 'Sets the current profile';
 
     private ProfileRepository $profileRepository;
+    private ProfileService $profileService;
 
-    public function __construct(ProfileRepository $profileRepository)
-    {
+    public function __construct(
+        ProfileRepository $profileRepository,
+        ProfileService $profileService
+    ) {
         parent::__construct();
 
         $this->profileRepository = $profileRepository;
+        $this->profileService = $profileService;
     }
 
     protected function configure(): void
@@ -43,10 +48,6 @@ class ProfileSetCommand extends Command
             return self::FAILURE;
         }
 
-        foreach ($this->profileRepository->findAll() as $profile) {
-            $profile->setCurrent(false);
-            $this->profileRepository->add($profile);
-        }
 
         $profile = $this->profileRepository->findOneBy(['name' => $profileName]);
 
@@ -57,6 +58,8 @@ class ProfileSetCommand extends Command
 
         $profile->setCurrent(true);
         $this->profileRepository->add($profile, true);
+
+        $this->profileService->setCurrentProfile($profile);
 
         return self::SUCCESS;
     }
