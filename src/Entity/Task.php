@@ -42,9 +42,15 @@ class Task
      */
     private Collection $logs;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private string $status;
+
     public function __construct()
     {
         $this->logs = new ArrayCollection();
+        $this->markAsPending();
     }
 
     public function getId(): ?int
@@ -116,5 +122,40 @@ class Task
         }
 
         return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function markAsPending(): void
+    {
+        $this->status = 'pending';
+    }
+
+    public function isPending(): bool
+    {
+        return $this->status === 'pending';
+    }
+
+    public function markAsInProgress(): void
+    {
+        $this->status = 'progress';
+    }
+
+    public function isInProgress(): bool
+    {
+        return $this->status === 'progress';
+    }
+
+    public function markAsDone(): void
+    {
+        $this->status = 'done';
+    }
+
+    public function isDone(): bool
+    {
+        return $this->status === 'done';
     }
 }

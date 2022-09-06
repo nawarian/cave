@@ -15,10 +15,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TaskStartCommand extends Command
+class TaskDoneCommand extends Command
 {
-    protected static $defaultName = 'task:start';
-    protected static $defaultDescription = 'Starts a given task';
+    protected static $defaultName = 'task:done';
+    protected static $defaultDescription = 'Closes progress and marks task as done';
 
     private TaskRepository $taskRepository;
     private TaskLogRepository $taskLogRepository;
@@ -66,21 +66,18 @@ class TaskStartCommand extends Command
         );
 
         foreach ($tasks as $task) {
-            /** @var TaskLog|false $latestOpenLog */
-            $latestOpenLog = $task
+            /** @var TaskLog|false $pendingLog */
+            $pendingLog = $task
                 ->getLogs()
                 ->filter(fn (TaskLog $tl) => $tl->getFinish() === null)
                 ->first();
 
-            if ($latestOpenLog === false) {
-                $latestOpenLog = new TaskLog();
-                $latestOpenLog->setTask($task);
-                $latestOpenLog->setStart(new DateTimeImmutable());
-
-                $this->taskLogRepository->add($latestOpenLog, true);
+            if ($pendingLog instanceof TaskLog) {
+                $pendingLog->setFinish(new DateTimeImmutable());
+                $this->taskLogRepository->add($pendingLog, true);
             }
 
-            $task->markAsInProgress();
+            $task->markAsDone();
             $this->taskRepository->add($task, true);
         }
 

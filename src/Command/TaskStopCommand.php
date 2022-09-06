@@ -41,7 +41,11 @@ class TaskStopCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $taskId = $input->getArgument('taskId');
+        $taskId = $input->getArgument('taskId') ?? null;
+        if ($taskId !== null) {
+            $taskId = (int) $taskId;
+        }
+
         $due = new DateTimeImmutable($input->getOption('due'));
         $project = $input->getOption('project');
 
@@ -72,6 +76,9 @@ class TaskStopCommand extends Command
                 $pendingLog->setFinish(new DateTimeImmutable());
                 $this->taskLogRepository->add($pendingLog, true);
             }
+
+            $task->markAsPending();
+            $this->taskRepository->add($task, true);
         }
 
         return self::SUCCESS;
