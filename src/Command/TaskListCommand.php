@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\TaskLog;
 use DateTimeImmutable;
 use DateTimeInterface;
-use DateInterval;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,6 +17,10 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class TaskListCommand extends Command
 {
+    private const TS_DAY = 60 * 60 * 24;
+    private const TS_HOUR = 60 * 60;
+    private const TS_MINUTE = 60;
+
     protected static $defaultName = 'task:list';
     protected static $defaultDescription = 'Lists all tasks respecting provided filters';
 
@@ -50,13 +53,14 @@ class TaskListCommand extends Command
         );
 
         $io->table(
-            ['ID', 'Summary', 'Project', 'Due'],
+            ['ID', 'Summary', 'Project', 'Due', 'Time spent'],
             array_map(
                 fn (Task $t) => [
                     $t->getId(),
                     $t->getSummary(),
                     $t->getProject(),
                     $this->formatDueDate($t->getDue()),
+                    $this->calculateTimeSpent($t),
                 ],
                 $tasks
             )
@@ -87,5 +91,29 @@ class TaskListCommand extends Command
 
         return "{$days} days";
     }
-}
 
+    private function calculateTimeSpent(Task $t): string
+    {
+        $logsInSeconds = $t
+            ->getLogs()
+            ->filter(fn (TaskLog $tl) => $tl->getStart() !== null && $tl->getFinish() !== null)
+            ->map(fn (TaskLog $tl) => $tl->getFinish()->getTimestamp() - $tl->getStart()->getTimestamp())
+            ->toArray();
+
+        $totalTimeSpentInSeconds = array_sum($logsInSeconds);
+
+        if ($totalTimeSpentInSeconds === 0) {
+            return '';
+        }
+
+        if ($totalTimeSpentInSeconds >= self::TS_DAY) {
+            return floor($totalTimeSpentInSeconds / self::TS_DAY) . ' days';
+        }
+
+        if ($totalTimeSpentInSeconds >= self::TS_HOUR) {
+            return floor($totalTimeSpentInSeconds / self::TS_HOUR) . ' hours';
+        }
+
+        return ceil($totalTimeSpentInSeconds / self::TS_MINUTE) . ' minutes';
+    }
+}
