@@ -10,6 +10,8 @@ use DateTimeInterface;
 use App\Entity\Task;
 use App\Repository\TaskRepository;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableCellStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -37,6 +39,7 @@ class TaskListCommand extends Command
         $this
             ->addOption('project', 'p', InputOption::VALUE_OPTIONAL, 'Filter by project name')
             ->addOption('due', 'd', InputOption::VALUE_OPTIONAL, 'Due date range in PHP format', '2099-01-01')
+            ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'Filter by status')
         ;
     }
 
@@ -45,18 +48,23 @@ class TaskListCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $project = $input->getOption('project');
         $due = new DateTimeImmutable($input->getOption('due'));
+        $status = $input->getOption('status') ?? null;
 
-        $tasks = $this->taskRepository->findTasksByDueDate($due);
         $tasks = array_filter(
             $this->taskRepository->findTasksByDueDate($due),
-            fn (Task $t) => $project === null || $t->getProject() === $project,
+            fn (Task $t) => ($project === null || $t->getProject() === $project)
+                && (($status === null && $t->isPending() || $t->isInProgress()) || $t->getStatus() === $status),
         );
 
         $io->table(
             ['ID', 'Summary', 'Project', 'Due', 'Time spent'],
             array_map(
                 fn (Task $t) => [
-                    $t->getId(),
+                    new TableCell((string) $t->getId(), [
+                        'style' => new TableCellStyle([
+                            'bg' => ['progress' => 'green'][$t->getStatus()] ?? 'default',
+                        ])
+                    ]),
                     $t->getSummary(),
                     $t->getProject(),
                     $this->formatDueDate($t->getDue()),
