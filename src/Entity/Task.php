@@ -47,6 +47,12 @@ class Task
      */
     private string $status;
 
+    /**
+     * @ORM\ManyToOne(targetEntity=Profile::class, inversedBy="tasks")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private Profile $profile;
+
     public function __construct()
     {
         $this->logs = new ArrayCollection();
@@ -157,5 +163,17 @@ class Task
     public function isDone(): bool
     {
         return $this->status === 'done';
+    }
+
+    public function getProfile(): ?Profile
+    {
+        return $this->profile;
+    }
+
+    public function setProfile(?Profile $profile): self
+    {
+        $this->profile = $profile;
+
+        return $this;
     }
 }

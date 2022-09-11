@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\TaskLog;
+use App\Service\ProfileService;
 use DateTimeImmutable;
 use DateTimeInterface;
 use App\Entity\Task;
@@ -27,11 +28,13 @@ class TaskListCommand extends Command
     protected static $defaultDescription = 'Lists all tasks respecting provided filters';
 
     private TaskRepository $taskRepository;
+    private ProfileService $profileService;
 
-    public function __construct(TaskRepository $taskRepository)
+    public function __construct(ProfileService $profileService, TaskRepository $taskRepository)
     {
         parent::__construct();
         $this->taskRepository = $taskRepository;
+        $this->profileService = $profileService;
     }
 
     protected function configure(): void
@@ -46,14 +49,16 @@ class TaskListCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $profile = $this->profileService->getCurrentProfile();
         $project = $input->getOption('project');
         $due = new DateTimeImmutable($input->getOption('due'));
         $status = $input->getOption('status') ?? null;
 
         $tasks = array_filter(
-            $this->taskRepository->findTasksByDueDate($due),
+            $this->taskRepository->findTasksByDueDate($profile, $due),
             fn (Task $t) => ($project === null || $t->getProject() === $project)
-                && (($status === null && $t->isPending() || $t->isInProgress()) || $t->getStatus() === $status),
+                && (($status === null && $t->isPending() || $t->isInProgress()) || $t->getStatus() === $status)
+                && $t->getProfile() === $profile,
         );
 
         $io->table(

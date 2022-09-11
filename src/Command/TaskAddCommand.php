@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Entity\Task;
 use App\Repository\TaskRepository;
+use App\Service\ProfileService;
 use DateTimeImmutable;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -20,10 +21,12 @@ class TaskAddCommand extends Command
     protected static $defaultDescription = 'Creates a new task';
 
     private TaskRepository $taskRepository;
+    private ProfileService $profileService;
 
-    public function __construct(TaskRepository $taskRepository)
+    public function __construct(ProfileService $profileService, TaskRepository $taskRepository)
     {
         parent::__construct();
+        $this->profileService = $profileService;
         $this->taskRepository = $taskRepository;
     }
 
@@ -39,6 +42,8 @@ class TaskAddCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
+        $profile = $this->profileService->getCurrentProfile();
+
         $summary = $input->getArgument('summary');
         $due = new DateTimeImmutable($input->getOption('due'));
         $project = $input->getOption('project') ?? null;
@@ -46,6 +51,7 @@ class TaskAddCommand extends Command
         $task = new Task();
         $task->setSummary($summary);
         $task->setDue($due);
+        $task->setProfile($profile);
 
         if ($project !== null) {
             $task->setProject($project);

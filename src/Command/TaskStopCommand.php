@@ -8,6 +8,7 @@ use App\Entity\Task;
 use App\Entity\TaskLog;
 use App\Repository\TaskLogRepository;
 use App\Repository\TaskRepository;
+use App\Service\ProfileService;
 use DateTimeImmutable;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,12 +23,14 @@ class TaskStopCommand extends Command
 
     private TaskRepository $taskRepository;
     private TaskLogRepository $taskLogRepository;
+    private ProfileService $profileService;
 
-    public function __construct(TaskRepository $taskRepository, TaskLogRepository $taskLogRepository)
+    public function __construct(ProfileService $profileService, TaskRepository $taskRepository, TaskLogRepository $taskLogRepository)
     {
         parent::__construct();
         $this->taskRepository = $taskRepository;
         $this->taskLogRepository = $taskLogRepository;
+        $this->profileService = $profileService;
     }
 
     protected function configure(): void
@@ -41,6 +44,7 @@ class TaskStopCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $profile = $this->profileService->getCurrentProfile();
         $taskId = $input->getArgument('taskId') ?? null;
         if ($taskId !== null) {
             $taskId = (int) $taskId;
@@ -51,7 +55,7 @@ class TaskStopCommand extends Command
 
         /** @var Task[] $tasks */
         $tasks = array_filter(
-            $this->taskRepository->findTasksByDueDate($due),
+            $this->taskRepository->findTasksByDueDate($profile, $due),
             function (Task $t) use ($taskId, $project) {
                 if ($taskId !== null && $t->getId() !== $taskId) {
                     return false;

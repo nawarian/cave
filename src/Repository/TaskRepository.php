@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Repository;
 
 use DateTimeInterface;
+use App\Entity\Profile;
 use App\Entity\Task;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
@@ -42,14 +43,15 @@ class TaskRepository extends ServiceEntityRepository
         }
     }
 
-    public function findTasksByDueDate(DateTimeInterface $due): array
+    public function findTasksByDueDate(Profile $profile, DateTimeInterface $due): array
     {
         $builder = $this->createQueryBuilder('t');
 
         return $builder
-            ->where('t.due <= :due')
+            ->where('t.due <= :due AND t.profile = :owner')
             ->orderBy('t.due', 'ASC')
             ->setParameter('due', $due->format('Y-m-d 23:59:59'))
+            ->setParameter('owner', $profile)
             ->getQuery()
             ->getResult();
     }
