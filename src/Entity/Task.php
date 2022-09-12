@@ -53,8 +53,14 @@ class Task
      */
     private Profile $profile;
 
+    /**
+     * @ORM\OneToMany(targetEntity=TaskAnnotation::class, mappedBy="task", orphanRemoval=true)
+     */
+    private Collection $annotations;
+
     public function __construct()
     {
+        $this->annotations = new ArrayCollection();
         $this->logs = new ArrayCollection();
         $this->markAsPending();
     }
@@ -173,6 +179,36 @@ class Task
     public function setProfile(?Profile $profile): self
     {
         $this->profile = $profile;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, TaskAnnotation>
+     */
+    public function getAnnotations(): Collection
+    {
+        return $this->annotations;
+    }
+
+    public function addAnnotation(TaskAnnotation $annotation): self
+    {
+        if (!$this->annotations->contains($annotation)) {
+            $this->annotations[] = $annotation;
+            $annotation->setTask($this);
+        }
+
+        return $this;
+    }
+
+    public function removeAnnotation(TaskAnnotation $annotation): self
+    {
+        if ($this->annotations->removeElement($annotation)) {
+            // set the owning side to null (unless already changed)
+            if ($annotation->getTask() === $this) {
+                $annotation->setTask(null);
+            }
+        }
 
         return $this;
     }

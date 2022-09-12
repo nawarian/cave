@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Command;
 
+use App\Entity\TaskAnnotation;
 use App\Entity\TaskLog;
 use App\Service\ProfileService;
 use DateTimeImmutable;
@@ -70,7 +71,7 @@ class TaskListCommand extends Command
                             'bg' => ['progress' => 'green'][$t->getStatus()] ?? 'default',
                         ])
                     ]),
-                    $t->getSummary(),
+                    $this->formatSummary($t),
                     $t->getProject(),
                     $this->formatDueDate($t->getDue()),
                     $this->calculateTimeSpent($t),
@@ -80,6 +81,17 @@ class TaskListCommand extends Command
         );
 
         return self::SUCCESS;
+    }
+
+    private function formatSummary(Task $task): string
+    {
+        $summary = [
+            $task->getSummary(),
+            ...$task->getAnnotations()
+                ->map(fn (TaskAnnotation $a) => "\t{$a->getText()}")
+                ->toArray(),
+        ];
+        return implode(PHP_EOL, $summary);
     }
 
     private function formatDueDate(DateTimeInterface $due): string
