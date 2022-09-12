@@ -59,7 +59,7 @@ class TaskCommand extends Command
         $commandParams = [];
         // Collect common params
         foreach ($params as $key => $param) {
-            if (is_numeric($param)) {
+            if (is_numeric($param) && $key === 1) {
                 $commandParams['taskId'] = $param;
                 $unset[] = $key;
             }
