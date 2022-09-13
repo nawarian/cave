@@ -3,6 +3,7 @@
 
 use App\Kernel;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
+use Symfony\Component\Console\Input\InputOption;
 
 if (!is_file(dirname(__DIR__).'/vendor/autoload_runtime.php')) {
     throw new LogicException('Symfony Runtime is missing. Try running "composer require symfony/runtime".');
@@ -13,5 +14,15 @@ require_once dirname(__DIR__).'/vendor/autoload_runtime.php';
 return function (array $context) {
     $kernel = new Kernel($context['APP_ENV'], (bool) $context['APP_DEBUG']);
 
-    return new Application($kernel);
+    $app = new Application($kernel);
+
+    $profileInputOption = new InputOption(
+        'profile',
+        'p',
+        InputOption::VALUE_OPTIONAL,
+        'Overrides the current profile when executing any command',
+    );
+    $app->getDefinition()->addOption($profileInputOption);
+
+    return $app;
 };

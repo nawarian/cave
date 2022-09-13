@@ -20,6 +20,10 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+    App\EventListener\ConsoleEventListener:
+        arguments:
+            - '@App\Service\ProfileService'
+            - '@App\Repository\ProfileRepository'
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones
