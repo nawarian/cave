@@ -18,7 +18,7 @@ class TwitterService
         $this->profileService = $profileService;
     }
 
-    /** @return array{ id: string, name: string, handle: string } */
+    /** @return array{ id: string, name: string, handle: string, followers: int, friends: int } */
     public function whoAmI(): array
     {
         $res = $this->client()->get('account/verify_credentials');
@@ -27,6 +27,8 @@ class TwitterService
             'id' => $res->id_str,
             'name' => $res->name,
             'handle' => $res->screen_name,
+            'followers' => $res->followers_count,
+            'friends' => $res->friends_count,
         ];
     }
 
