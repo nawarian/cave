@@ -35,7 +35,7 @@ class TaskAddCommand extends Command
         $this
             ->addArgument('summary', InputArgument::REQUIRED, 'The summary of your task')
             ->addOption('due', 'd', InputOption::VALUE_OPTIONAL, 'Tasks due date in PHP date format', '2099-01-01')
-            ->addOption('project', 'p', InputOption::VALUE_OPTIONAL, 'Project name')
+            ->addOption('project', null, InputOption::VALUE_OPTIONAL, 'Project name')
         ;
     }
 

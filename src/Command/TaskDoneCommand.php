@@ -37,7 +37,7 @@ class TaskDoneCommand extends Command
     {
         $this
             ->addArgument('taskId', InputArgument::OPTIONAL, 'Identifier of the task to be started')
-            ->addOption('project', 'p', InputOption::VALUE_OPTIONAL, 'A project to filter by')
+            ->addOption('project', null, InputOption::VALUE_OPTIONAL, 'A project to filter by')
             ->addOption('due', 'd', InputOption::VALUE_OPTIONAL, 'A due date to filter by', '2099-01-01')
         ;
     }

@@ -41,7 +41,7 @@ class TaskListCommand extends Command
     protected function configure(): void
     {
         $this
-            ->addOption('project', 'p', InputOption::VALUE_OPTIONAL, 'Filter by project name')
+            ->addOption('project', null, InputOption::VALUE_OPTIONAL, 'Filter by project name')
             ->addOption('due', 'd', InputOption::VALUE_OPTIONAL, 'Due date range in PHP format', '2099-01-01')
             ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'Filter by status')
         ;
