@@ -1,0 +1,5 @@
+services:
+    App\Factory\GoogleClientFactory: ~
+    Google_Client:
+        class: Google_Client
+        factory: ['@App\Factory\GoogleClientFactory', 'createGoogleClient']

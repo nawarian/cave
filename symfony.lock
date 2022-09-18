@@ -38,6 +38,18 @@
             "migrations/.gitignore"
         ]
     },
+    "google/apiclient": {
+        "version": "2.12",
+        "recipe": {
+            "repo": "github.com/symfony/recipes-contrib",
+            "branch": "main",
+            "version": "2.0",
+            "ref": "49c5d7a66d863d28513979bf0666dc77599100c0"
+        },
+        "files": [
+            "config/packages/google_apiclient.yaml"
+        ]
+    },
     "symfony/console": {
         "version": "5.4",
         "recipe": {
