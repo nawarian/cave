@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace App\Command;
 
 use App\Entity\GoogleStat;
+use App\Entity\GooglePageStat;
 use App\Repository\GoogleStatRepository;
+use App\Repository\GooglePageStatRepository;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Google\Service\SearchConsole;
@@ -23,12 +25,17 @@ class GscSyncCommand extends Command
 
     private Google_Client $client;
     private GoogleStatRepository $googleStatRepository;
+    private GooglePageStatRepository $googlePageStatRepository;
 
-    public function __construct(GoogleStatRepository $googleStatRepository, Google_Client $client)
-    {
+    public function __construct(
+        GoogleStatRepository $googleStatRepository,
+        GooglePageStatRepository $googlePageStatRepository,
+        Google_Client $client
+    ) {
         parent::__construct();
         $this->client = $client;
         $this->googleStatRepository = $googleStatRepository;
+        $this->googlePageStatRepository = $googlePageStatRepository;
     }
 
     protected function configure(): void
@@ -43,6 +50,12 @@ class GscSyncCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $this->syncGoogleStats(
+            $input->getArgument('site'),
+            new DateTimeImmutable($input->getOption('from')),
+            new DateTimeImmutable($input->getOption('until')),
+        );
+
+        $this->syncGoogleStatsPerPage(
             $input->getArgument('site'),
             new DateTimeImmutable($input->getOption('from')),
             new DateTimeImmutable($input->getOption('until')),
@@ -80,6 +93,39 @@ class GscSyncCommand extends Command
                 ->setSite($site);
 
             $this->googleStatRepository->add($stat, true);
+        }
+    }
+
+    private function syncGooglestatsPerPage(string $site, DateTimeInterface $begin, DateTimeImmutable $end): void
+    {
+        $searchAnalyticsQuery = new SearchConsole\SearchAnalyticsQueryRequest();
+        $searchAnalyticsQuery->setStartDate($begin->format('Y-m-d'));
+        $searchAnalyticsQuery->setEndDate($end->format('Y-m-d'));
+        $searchAnalyticsQuery->setDimensions(['page', 'date']);
+
+        $gsc = new SearchConsole($this->client);
+        $response = $gsc->searchanalytics->query($site, $searchAnalyticsQuery);
+
+        foreach ($response as $row) {
+            [$page, $date] = $row->keys;
+            $date = new DateTimeImmutable($date);
+
+            $stat = $this->googlePageStatRepository->findOneBy([
+                'site' => $site,
+                'date' => $date,
+                'page' => $page,
+            ]) ?? new GooglePageStat();
+
+            $stat
+                ->setPosition($row->position)
+                ->setClicks($row->clicks)
+                ->setCtr($row->ctr)
+                ->setImpressions($row->impressions)
+                ->setDate($date)
+                ->setSite($site)
+                ->setPage($page);
+
+            $this->googlePageStatRepository->add($stat, true);
         }
     }
 }
